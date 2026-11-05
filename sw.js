@@ -1,0 +1,57 @@
+/**
+ * Service Worker สำหรับใช้งานออฟไลน์ (Offline-first Cache)
+ */
+
+const CACHE_NAME = 'study-train-ticket-v1';
+const ASSETS_TO_CACHE = [
+  './',
+  './index.html',
+  './css/variables.css',
+  './css/animations.css',
+  './css/ticket.css',
+  './css/style.css',
+  './js/routes-data.js',
+  './js/audio.js',
+  './js/storage.js',
+  './js/ticket-drag.js',
+  './js/timer.js',
+  './js/app.js',
+  './manifest.json'
+];
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(ASSETS_TO_CACHE);
+    }).then(() => self.skipWaiting())
+  );
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+      );
+    }).then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener('fetch', (event) => {
+  // กลยุทธ์ Cache First, Network Fallback
+  event.respondWith(
+    caches.match(event.request).then((cachedResponse) => {
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+      return fetch(event.request).then((networkResponse) => {
+        return networkResponse;
+      }).catch(() => {
+        // ออฟไลน์และไม่มีในแคช
+        if (event.request.mode === 'navigate') {
+          return caches.match('./index.html');
+        }
+      });
+    })
+  );
+});

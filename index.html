@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta name="description" content="ตั๋วอ่านหนังสือ - เว็บแอปจับเวลาอ่านหนังสือธีมรถไฟไทย แปลงเวลาอ่านเป็นระยะทางสะสม">
+  <meta name="theme-color" content="#1b365d">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="ตั๋วอ่านหนังสือ">
+  
+  <title>ตั๋วอ่านหนังสือ 🚂 | Study Train Ticket</title>
+  
+  <!-- ฟอนต์ไทยจาก Google Fonts (Mitr สำหรับหัวข้อ และ Sarabun สำหรับเนื้อหา) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500;600&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/ticket.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+
+  <!-- แถบส่วนหัวของแอป (App Header) -->
+  <header class="app-header">
+    <div class="brand-group">
+      <div class="brand-icon" aria-hidden="true">🚂</div>
+      <div>
+        <h1 class="brand-title">ตั๋วอ่านหนังสือ</h1>
+        <div id="header-route-name" class="brand-subtitle">สายเหนือ: กรุงเทพ → เชียงใหม่</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button id="btn-toggle-sound" class="icon-btn" title="เปิด/ปิดเสียง" aria-label="เปิด/ปิดเสียง">🔊</button>
+      <button id="btn-toggle-dark" class="icon-btn" title="สลับโหมดมืด/สว่าง" aria-label="สลับโหมดมืด">🌙</button>
+    </div>
+  </header>
+
+  <!-- แถบประกาศสถานี (Station Announcement Ticker) -->
+  <div class="station-ticker" role="status" aria-live="polite">
+    <span class="ticker-icon" aria-hidden="true">📢</span>
+    <span id="ticker-announcement" class="ticker-text">ท่านผู้โดยสารโปรดทราบ ขบวนรถเพื่อการเรียนรู้กำลังจะออกจากชานชาลา</span>
+  </div>
+
+  <!-- คอนเทนเนอร์เนื้อหาหลัก (Main Screen Container) -->
+  <main class="main-container">
+
+    <!-- 1. หน้าซื้อตั๋ว (Screen: Buy Ticket) -->
+    <section id="screen-buy-ticket" class="screen active">
+      <div class="card">
+        <h2 class="card-title">🎫 ออกตั๋วอ่านหนังสือ (ตั้งเป้าหมาย)</h2>
+        
+        <!-- กรอกชื่อวิชา / หนังสือ -->
+        <div class="form-group">
+          <label for="input-subject" class="form-label">ชื่อวิชา / หนังสือ / งานที่อ่าน</label>
+          <input type="text" id="input-subject" class="form-input" placeholder="เช่น ฟิสิกส์ ม.ปลาย, เตรียมสอบ ก.พ., อ่านนิยาย" value="เตรียมสอบภาคเช้า" autocomplete="off">
+          <div style="font-size: 0.75rem; color: var(--ink-secondary); margin-top: 6px;">เลือกวิชาที่เคยใช้:</div>
+          <div id="recent-subjects-container" class="chip-group"></div>
+        </div>
+
+        <!-- เลือกระยะเวลาอ่าน -->
+        <div class="form-group">
+          <label class="form-label">ระยะเวลาอ่านเป้าหมาย</label>
+          <div class="chip-group">
+            <button type="button" class="chip-btn duration-chip" data-duration="15">15 นาที (+7.5 กม.)</button>
+            <button type="button" class="chip-btn duration-chip active" data-duration="25">25 นาที (Pomodoro +12.5 กม.)</button>
+            <button type="button" class="chip-btn duration-chip" data-duration="50">50 นาที (+25 กม.)</button>
+            <button type="button" class="chip-btn duration-chip" data-duration="90">90 นาที (+45 กม.)</button>
+          </div>
+          <div style="margin-top: 10px; display: flex; align-items: center; gap: 8px;">
+            <label for="input-custom-duration" style="font-size: 0.85rem; color: var(--ink-secondary);">หรือกำหนดเอง:</label>
+            <input type="number" id="input-custom-duration" class="form-input" style="width: 100px; min-height: 38px; padding: 6px 10px;" placeholder="นาที" min="1" max="300">
+            <span style="font-size: 0.85rem; color: var(--ink-secondary);">นาที</span>
+          </div>
+        </div>
+
+        <!-- เลือกประเภทตั๋ว / ชั้นโดยสาร -->
+        <div class="form-group">
+          <label class="form-label">ประเภทตั๋วโดยสาร</label>
+          <div class="ticket-class-grid">
+            <div class="class-card active" data-class-id="class3">
+              <span class="class-card-icon">🪑</span>
+              <span class="class-card-name">ชั้น 3 (ธรรมดา)</span>
+              <span class="class-card-badge">อ่านยาวไม่มีพัก</span>
+            </div>
+            <div class="class-card" data-class-id="class2">
+              <span class="class-card-icon">❄️</span>
+              <span class="class-card-name">ชั้น 2 (ปรับอากาศ)</span>
+              <span class="class-card-badge">นั่งสบาย แอร์เย็น</span>
+            </div>
+            <div class="class-card" data-class-id="class1">
+              <span class="class-card-icon">🛏️</span>
+              <span class="class-card-name">ชั้น 1 (ตู้นอน)</span>
+              <span class="class-card-badge">ตู้นอนสไตล์ Pomodoro</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ส่วนแสดงตั๋วเสมือนจริง (Interactive Live Ticket Preview) -->
+      <div style="margin: var(--space-lg) 0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span style="font-family: var(--font-header); font-size: 0.95rem; font-weight: 600;">ตั๋วโดยสารของคุณ (ลากฉีกส่วนหางเพื่อออกเดินทาง)</span>
+          <span style="font-size: 0.75rem; color: var(--ink-muted);">อัตรา 60 นาที = 30 กม.</span>
+        </div>
+        
+        <div class="ticket-wrapper">
+          <div id="preview-ticket"></div>
+        </div>
+
+        <!-- ปุ่มทางเลือกสำหรับฉีกตั๋ว (Fallback Accessible Button) -->
+        <div style="margin-top: 16px;">
+          <button id="btn-direct-tear" class="btn btn-tear" type="button" aria-label="ฉีกตั๋วเพื่อเริ่มออกเดินทาง">
+            <span>✂️ ฉีกตั๋วเพื่อเริ่มออกเดินทาง</span>
+          </button>
+          <p style="text-align: center; font-size: 0.75rem; color: var(--ink-muted); margin-top: 6px;">
+            คุณสามารถใช้นิ้วลากใบย้อยทางขวาของตั๋วออก หรือกดปุ่มด้านบนนี้เพื่อเริ่มจับเวลา
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. หน้าจับเวลา (Screen: Minimalist Reading Timer) -->
+    <section id="screen-timer" class="screen">
+      <div class="timer-container">
+        <div id="timer-subject-display" class="timer-subject-tag">วิชา: เตรียมสอบภาคเช้า</div>
+        
+        <!-- ตัวเลขนับถอยหลังขนาดใหญ่ -->
+        <div id="timer-countdown-display" class="big-countdown tabular-nums" aria-live="off" role="timer">25:00</div>
+        
+        <!-- เส้นความคืบหน้าของเที่ยวนี้ -->
+        <div class="trip-track-card">
+          <div class="trip-track-header">
+            <span style="font-weight: 600;">เส้นทางเที่ยวนี้</span>
+            <span style="color: var(--ink-accent);">ระบบล็อกหน้าจอเปิดอยู่ (Wake Lock)</span>
+          </div>
+          <div id="timer-mini-track" class="trip-track-svg-wrapper"></div>
+          <div id="timer-checkpoint-display" class="trip-track-status">กำลังผ่าน: บริเวณดอนเมือง (กม. ที่ 12)</div>
+        </div>
+
+        <!-- ตั๋วที่ถูกฉีกหางแล้ว -->
+        <div class="ticket-wrapper" style="margin-bottom: var(--space-lg);">
+          <div id="timer-ticket-container"></div>
+        </div>
+
+        <!-- ปุ่มยกเลิกเที่ยว -->
+        <div>
+          <button id="btn-open-cancel-modal" class="btn btn-danger" style="width: auto; padding: 10px 24px;" type="button">
+            🛑 ขอยกเลิกขบวนรถนี้
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. หน้าถึงสถานี (Screen: Station Arrival) -->
+    <section id="screen-arrival" class="screen">
+      <div class="card arrival-card">
+        <div class="arrival-badge">🔔</div>
+        <h2 class="arrival-title">ถึงสถานีปลายทางแล้ว!</h2>
+        <p id="arrival-message" class="arrival-subtitle">ขอแสดงความยินดี คุณได้อ่านหนังสือสำเร็จตามเป้าหมาย</p>
+
+        <!-- พื้นที่แจ้งเตือนตราประทับใหม่ -->
+        <div id="new-stamps-alert-area"></div>
+
+        <!-- ตั๋วที่ได้รับการประทับตรา "ตรวจแล้ว" -->
+        <div class="ticket-wrapper" style="margin: var(--space-lg) auto;">
+          <div id="arrival-ticket-container"></div>
+        </div>
+
+        <!-- สรุปผลเที่ยวนี้ -->
+        <div class="summary-stats-grid">
+          <div class="stat-box">
+            <div id="arrival-stat-time" class="stat-box-val tabular-nums">25 นาที</div>
+            <div class="stat-box-lbl">เวลาที่อ่านเที่ยวนี้</div>
+          </div>
+          <div class="stat-box">
+            <div id="arrival-stat-km" class="stat-box-val tabular-nums">+12.5</div>
+            <div class="stat-box-lbl">ระยะทางที่พิชิต (กม.)</div>
+          </div>
+          <div class="stat-box">
+            <div id="arrival-stat-station" class="stat-box-val">อยุธยา</div>
+            <div class="stat-box-lbl">สถานีปัจจุบัน</div>
+          </div>
+        </div>
+
+        <button id="btn-next-trip" class="btn btn-primary" type="button">
+          <span>🎫 ซื้อตั๋วเที่ยวต่อไป (ออกเดินทางต่อ)</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- 4. หน้าผังเส้นทาง (Screen: Route Schematic Map) -->
+    <section id="screen-route" class="screen">
+      <div class="route-header-card card">
+        <div class="route-info-left">
+          <h2>ผังเส้นทางรถไฟ (Route Map)</h2>
+          <div id="route-progress-stats" style="font-size: 0.85rem; color: var(--ink-secondary); margin-top: 4px;">
+            พิชิตแล้ว 0 / 751 กม. (0%)
+          </div>
+        </div>
+        <div>
+          <label for="select-route" style="font-size: 0.8rem; color: var(--ink-secondary); display: block; margin-bottom: 4px;">เลือกสายรถไฟ:</label>
+          <select id="select-route" class="form-input" style="min-height: 38px; padding: 4px 10px; font-size: 0.85rem; width: auto;"></select>
+        </div>
+      </div>
+
+      <div class="route-svg-container">
+        <div id="route-map-canvas"></div>
+      </div>
+    </section>
+
+    <!-- 5. หน้าพาสปอร์ต (Screen: Railway Passport Stamps) -->
+    <section id="screen-passport" class="screen">
+      <div class="card passport-header-info">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h2 class="card-title" style="margin-bottom: 0;">📖 สมุดสะสมตราประทับรถไฟ</h2>
+          <span id="passport-progress-label" style="font-size: 0.8rem; font-weight: 600; color: var(--ink-accent);">สะสมแล้ว 1 / 7 สถานี</span>
+        </div>
+        <p style="font-size: 0.82rem; color: var(--ink-secondary); margin-top: 4px;">
+          ตราประทับสถานีจะถูกปลดล็อกโดยอัตโนมัติเมื่อระยะทางสะสมเดินทางข้ามสถานีนั้นๆ
+        </p>
+        <div class="passport-progress-bar">
+          <div id="passport-progress-fill" class="passport-progress-fill"></div>
+        </div>
+      </div>
+
+      <div id="passport-stamps-grid" class="passport-grid"></div>
+    </section>
+
+    <!-- 6. หน้าสถิติ (Screen: Statistics) -->
+    <section id="screen-stats" class="screen">
+      <div class="stats-summary-grid">
+        <div class="stats-card-main">
+          <div class="stats-card-icon">⏱️</div>
+          <div class="stats-card-content">
+            <h3 id="stat-today-min" class="tabular-nums">0 นาที</h3>
+            <p>เวลาอ่านรวมวันนี้</p>
+          </div>
+        </div>
+        <div class="stats-card-main">
+          <div class="stats-card-icon">📅</div>
+          <div class="stats-card-content">
+            <h3 id="stat-week-min" class="tabular-nums">0 นาที</h3>
+            <p>เวลาอ่านรวมสัปดาห์นี้</p>
+          </div>
+        </div>
+        <div class="stats-card-main">
+          <div class="stats-card-icon">🛤️</div>
+          <div class="stats-card-content">
+            <h3 id="stat-total-km" class="tabular-nums">0 กม.</h3>
+            <p>ระยะทางสะสมทั้งหมด</p>
+          </div>
+        </div>
+        <div class="stats-card-main">
+          <div class="stats-card-icon">🔥</div>
+          <div class="stats-card-content">
+            <h3 id="stat-streak-days" class="tabular-nums">0 วัน</h3>
+            <p>อ่านต่อเนื่อง (Streak)</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ประวัติเที่ยวล่าสุด -->
+      <div class="card">
+        <h3 class="card-title">📜 ประวัติเที่ยวอ่านหนังสือล่าสุด</h3>
+        <div id="trip-history-list" class="history-list"></div>
+      </div>
+
+      <!-- จัดการข้อมูล (Data Backup & Reset) -->
+      <div class="card">
+        <h3 class="card-title">⚙️ จัดการข้อมูลการเดินทาง</h3>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+          <button id="btn-export-data" class="btn btn-outline" style="width: auto;" type="button">💾 สำรองข้อมูล (Export JSON)</button>
+          <label class="btn btn-outline" style="width: auto; margin-bottom: 0; cursor: pointer;">
+            📥 นำเข้าข้อมูล (Import)
+            <input type="file" id="input-import-data" accept=".json" style="display: none;">
+          </label>
+          <button id="btn-reset-data" class="btn btn-danger" style="width: auto;" type="button">🗑️ รีเซ็ตข้อมูลทั้งหมด</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- แถบเมนูด้านล่าง (Bottom Navigation Bar) -->
+  <nav class="bottom-nav" aria-label="แถบเมนูหลัก">
+    <button class="nav-tab active" data-screen="screen-buy-ticket">
+      <span class="nav-tab-icon" aria-hidden="true">🎫</span>
+      <span>ซื้อตั๋ว</span>
+    </button>
+    <button class="nav-tab" data-screen="screen-timer">
+      <span class="nav-tab-icon" aria-hidden="true">⏱️</span>
+      <span>จับเวลา</span>
+    </button>
+    <button class="nav-tab" data-screen="screen-route">
+      <span class="nav-tab-icon" aria-hidden="true">🗺️</span>
+      <span>เส้นทาง</span>
+    </button>
+    <button class="nav-tab" data-screen="screen-passport">
+      <span class="nav-tab-icon" aria-hidden="true">📖</span>
+      <span>พาสปอร์ต</span>
+    </button>
+    <button class="nav-tab" data-screen="screen-stats">
+      <span class="nav-tab-icon" aria-hidden="true">📊</span>
+      <span>สถิติ</span>
+    </button>
+  </nav>
+
+  <!-- Modal: ยืนยันการยกเลิกขบวนรถ -->
+  <div id="cancel-trip-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="cancel-modal-title">
+    <div class="modal-card">
+      <div style="font-size: 2.5rem; margin-bottom: 8px;">⚠️</div>
+      <h3 id="cancel-modal-title" style="font-size: 1.25rem; margin-bottom: 8px;">ยืนยันการยกเลิกขบวนรถ?</h3>
+      <p style="font-size: 0.9rem; color: var(--ink-secondary); margin-bottom: 16px;">
+        หากยกเลิกตอนนี้ เที่ยวนี้จะไม่ได้รับระยะทางสะสม และตั๋วใบนี้จะถูกยกเลิก คุณแน่ใจหรือไม่ว่าต้องการหยุดอ่านก่อนกำหนด?
+      </p>
+      <div class="modal-actions">
+        <button id="btn-dismiss-cancel" class="btn btn-outline" type="button">อ่านต่อ</button>
+        <button id="btn-confirm-cancel" class="btn btn-danger" type="button">ยืนยันยกเลิก</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: รายละเอียดสถานีรถไฟ -->
+  <div id="station-detail-modal" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div id="station-modal-content"></div>
+      <div class="modal-actions" style="margin-top: 16px;">
+        <button id="btn-close-station-modal" class="btn btn-primary" type="button">ปิด</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- สคริปต์หลักตามลำดับการทำงาน -->
+  <script src="js/routes-data.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/ticket-drag.js"></script>
+  <script src="js/timer.js"></script>
+  <script src="js/app.js"></script>
+
+  <!-- PWA Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(err => {
+          console.log('SW registration note:', err);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

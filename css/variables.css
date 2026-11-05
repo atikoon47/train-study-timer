@@ -1,0 +1,72 @@
+:root {
+  /* โทนสีหลัก: ตั๋วรถไฟไทยคลาสสิก (Day Mode - Classic Paper Ticket) */
+  --bg-app: #f4ede2;
+  --bg-card: #fdfaf3;
+  --bg-card-secondary: #f6efe2;
+  
+  --ticket-paper: #fbf6eb;
+  --ticket-paper-shadow: rgba(60, 40, 20, 0.14);
+  --ticket-border: #d8c8b0;
+  --ticket-perforate: #a8947c;
+  
+  /* สีหมึกพิมพ์การรถไฟแห่งประเทศไทย (SRT Colors) */
+  --ink-primary: #1b365d;       /* น้ำเงินเข้ม รฟท. */
+  --ink-secondary: #4a5568;     /* เทาเข้ม */
+  --ink-muted: #7c8899;         /* เทาอมฟ้าจาง */
+  --ink-accent: #8b1e1e;        /* แดงเข้มเลือดหมู */
+  --ink-gold: #b38600;          /* ทองเหลืองป้ายสถานี */
+  
+  /* สีตราประทับและสถานะ */
+  --stamp-red: #c82333;
+  --stamp-blue: #0d6efd;
+  --stamp-green: #198754;
+  --track-active: #1b365d;
+  --track-inactive: #d1c7b7;
+  
+  /* ฟอนต์ */
+  --font-header: 'Mitr', 'Noto Sans Thai', -apple-system, sans-serif;
+  --font-body: 'Sarabun', 'Noto Sans Thai', -apple-system, sans-serif;
+  --font-mono: 'Courier New', 'Consolas', monospace;
+  
+  /* เงาและขอบโค้ง */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 16px rgba(50, 35, 15, 0.08);
+  --shadow-lg: 0 10px 30px rgba(50, 35, 15, 0.12);
+  --shadow-ticket: 0 8px 24px rgba(45, 30, 10, 0.13), 0 2px 6px rgba(0, 0, 0, 0.04);
+
+  /* ระยะห่าง */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+}
+
+/* โหมดมืด: รถไฟตู้นอนกลางคืน (Night Train Sleeper Berth Mode) */
+body.dark-mode {
+  --bg-app: #12161f;
+  --bg-card: #1a202c;
+  --bg-card-secondary: #232b3b;
+  
+  --ticket-paper: #1e2638;
+  --ticket-paper-shadow: rgba(0, 0, 0, 0.45);
+  --ticket-border: #334155;
+  --ticket-perforate: #475569;
+  
+  --ink-primary: #e2e8f0;
+  --ink-secondary: #94a3b8;
+  --ink-muted: #64748b;
+  --ink-accent: #f87171;
+  --ink-gold: #facc15;
+  
+  --stamp-red: #ef4444;
+  --stamp-blue: #38bdf8;
+  --stamp-green: #34d399;
+  --track-active: #38bdf8;
+  --track-inactive: #334155;
+  
+  --shadow-ticket: 0 8px 26px rgba(0, 0, 0, 0.5);
+}

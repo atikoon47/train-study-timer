@@ -1,0 +1,139 @@
+/* ========================================================
+   แอนิเมชันสำหรับรถไฟไทย ตั๋ว และตราประทับ (Railway Animations)
+   ======================================================== */
+
+/* แอนิเมชันตัวรถไฟโยกเบา ๆ ขณะวิ่ง (Train Rocking) */
+@keyframes train-rock {
+  0% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-1.5px) rotate(0.4deg); }
+  50% { transform: translateY(0) rotate(0deg); }
+  75% { transform: translateY(-1px) rotate(-0.4deg); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+
+.anim-train-rock {
+  animation: train-rock 1.2s infinite ease-in-out;
+  transform-origin: bottom center;
+}
+
+/* แอนิเมชันล้อรถไฟหมุน (Wheels Spinning) */
+@keyframes wheel-turn {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.anim-wheel {
+  animation: wheel-turn 0.8s infinite linear;
+  transform-origin: center;
+}
+
+/* แอนิเมชันควันรถไฟลอยออกจากปล่อง (Steam Puffing) */
+@keyframes steam-puff {
+  0% {
+    opacity: 0.8;
+    transform: translate(0, 0) scale(0.6);
+  }
+  50% {
+    opacity: 0.5;
+    transform: translate(-15px, -18px) scale(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-30px, -35px) scale(1.8);
+  }
+}
+
+.steam-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(220, 220, 220, 0.7);
+  pointer-events: none;
+  animation: steam-puff 1.6s infinite ease-out;
+}
+
+.steam-particle:nth-child(2) {
+  animation-delay: 0.5s;
+}
+
+.steam-particle:nth-child(3) {
+  animation-delay: 1.0s;
+}
+
+/* แอนิเมชันลูกศรบอกทิศทางฉีกตั๋ว (Pulse Arrow) */
+@keyframes pulse-arrow {
+  0%, 100% {
+    transform: translateX(0);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translateX(6px);
+    opacity: 1;
+  }
+}
+
+/* แอนิเมชันประทับตรากระแทกลงบนกระดาษ (Rubber Stamp Slam Impact) */
+@keyframes stamp-slam {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(2.6) rotate(-25deg);
+  }
+  60% {
+    opacity: 0.95;
+    transform: translate(-50%, -50%) scale(0.92) rotate(-11deg);
+  }
+  80% {
+    transform: translate(-50%, -50%) scale(1.05) rotate(-13deg);
+  }
+  100% {
+    opacity: 0.9;
+    transform: translate(-50%, -50%) scale(1) rotate(-12deg);
+  }
+}
+
+/* ตั๋วถูกฉีกขาดครึ่งใบเมื่อกดยกเลิก (Ticket Tear Half on Cancel) */
+@keyframes tear-half {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.95) rotate(-3deg);
+    filter: grayscale(0.5);
+  }
+  100% {
+    transform: scale(0.92) rotate(-5deg);
+    filter: grayscale(1);
+    opacity: 0.7;
+  }
+}
+
+.ticket-torn-cancelled {
+  animation: tear-half 0.5s forwards ease-out;
+}
+
+/* ไฟกระพริบชานชาลา / สัญญาณระฆัง (Chime Flash) */
+@keyframes signal-glow {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; filter: drop-shadow(0 0 8px var(--stamp-green)); }
+}
+
+.signal-blinking {
+  animation: signal-glow 1s infinite ease-in-out;
+}
+
+/* เคารพผู้ใช้ที่ตั้งค่า prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .anim-train-rock,
+  .anim-wheel,
+  .steam-particle,
+  .stub-arrow-icon,
+  .signal-blinking {
+    animation: none !important;
+  }
+
+  .stamp-overlay.active {
+    animation: none !important;
+    opacity: 0.95;
+    transform: translate(-50%, -50%) rotate(-12deg);
+  }
+}
