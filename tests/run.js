@@ -1,7 +1,7 @@
 // รันด้วย: node tests/run.js
 const assert = require('assert');
 const Rail = require('../js/rail.js');
-const { Store, dayKey, streak } = require('../js/store.js');
+const { Store, dayKey, streak, stamps, week } = require('../js/store.js');
 
 let passed = 0;
 function test(name, fn) {
@@ -94,6 +94,32 @@ test('สายอีสานใช้ฉากอีสาน', () => {
   assert.strictEqual(Rail.STATIONS.kkn.scene, 'isan');
 });
 
+test('สายน้ำตกแยกจากสายใต้ที่ชุมทางหนองปลาดุก', () => {
+  const r = Rail.route('ntk', 'hhn');
+  const ids = r.stops.map(s => s.id);
+  assert.deepStrictEqual(ids, ['ntk', 'tks', 'rkb', 'kbi', 'npd', 'rbr', 'pbi', 'hhn']);
+  assert.strictEqual(r.km, (203 - 73) + (222 - 73));
+});
+
+test('สายตะวันออกไปอรัญประเทศ และข้ามไปสายเหนือผ่านกรุงเทพอภิวัฒน์', () => {
+  assert.strictEqual(Rail.route('kta', 'arn').km, 260);
+  const r = Rail.route('arn', 'aya');
+  assert.ok(r.stops.some(s => s.id === 'kta'));
+  assert.strictEqual(r.km, 260 + 64);
+});
+
+test('ทุกสถานีมีพิกัด และอยู่บนสายอย่างน้อยหนึ่งสาย', () => {
+  for (const id of Object.keys(Rail.STATIONS)) {
+    assert.ok(Array.isArray(Rail.STATIONS[id].lngLat), id);
+    assert.ok(Rail.linesOf(id).length > 0, id);
+  }
+});
+
+test('ขบวนธรรมดาจากกรุงเทพไปเชียงใหม่ใช้เวลาไม่เกิน 4.5 ชั่วโมง', () => {
+  const s = Rail.services(Rail.route('kta', 'cmi'));
+  assert.ok(s.find(x => x.id === 'ordinary').minutes <= 270);
+});
+
 console.log('store');
 test('dayKey ใช้วันตามเวลาเครื่อง ไม่ใช่ UTC', () => {
   const t = new Date(2026, 10, 14, 0, 30).getTime(); // 00:30 น.
@@ -119,6 +145,32 @@ test('localStorage พังก็ยังทำงานต่อได้', (
   const s = new Store(broken);
   s.set({ here: 'aya' });
   assert.strictEqual(s.state.here, 'aya');
+});
+
+test('ตราประทับนับสถานีที่ลงจริง ไม่นับเที่ยวที่ยังไม่ได้อ่าน', () => {
+  const trips = [
+    { alightedAt: 'aya', minutesDone: 30, endedAt: 3 },
+    { alightedAt: 'dmk', minutesDone: 0, endedAt: 2 },
+    { alightedAt: 'aya', minutesDone: 20, endedAt: 1 }
+  ]; // ใหม่สุดอยู่หน้า เหมือนใน store
+  const st = stamps(trips);
+  assert.deepStrictEqual(Object.keys(st), ['aya']);
+  assert.deepStrictEqual(st.aya, { first: 1, count: 2 });
+});
+test('สรุปรายสัปดาห์: 7 วันเรียงเก่าไปใหม่ และแยกตามวิชา', () => {
+  const at = (d, h = 20) => new Date(2026, 10, d, h, 0).getTime();
+  const trips = [
+    { subject: 'ฟิสิกส์', minutesDone: 40, endedAt: at(15) },
+    { subject: '', minutesDone: 10, endedAt: at(15, 8) },
+    { subject: 'เคมี', minutesDone: 25, endedAt: at(12) },
+    { subject: 'ฟิสิกส์', minutesDone: 99, endedAt: at(8) } // เกิน 7 วัน
+  ];
+  const w = week(trips, at(15, 23));
+  assert.strictEqual(w.days.length, 7);
+  assert.strictEqual(w.days[0].key, '2026-11-09');
+  assert.strictEqual(w.days[6].minutes, 50);
+  assert.strictEqual(w.total, 75);
+  assert.deepStrictEqual(w.subjects.map(x => x.name), ['ฟิสิกส์', 'เคมี', 'ไม่ได้ระบุวิชา']);
 });
 
 console.log(`\n${passed} passed${process.exitCode ? ', some FAILED' : ''}`);

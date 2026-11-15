@@ -302,7 +302,7 @@ const Scene = (() => {
     load(trip) {
       this.route = trip.route;
       this.T = trip.minutes * 60;
-      this.v = (this.reduced ? 0 : BASE_PX * Math.max(0.55, trip.speed / 4));
+      this.v = (this.reduced ? 0 : BASE_PX * Math.max(0.55, trip.speed / 8));
       this.startedAt = trip.startedAt;
       // เวลาที่รถผ่านแต่ละสถานี (วินาที) → แปลงเป็นระยะพิกเซลบนชั้นหน้า
       this.plats = this.route.stops.map(s => {

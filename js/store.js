@@ -29,8 +29,35 @@
     return trips.filter(t => dayKey(t.endedAt) === key).reduce((sum, t) => sum + t.minutesDone, 0);
   }
 
+  // ตราประทับ: สถานีที่เคยลงจากรถ (อ่านไปแล้วอย่างน้อย 1 นาที) — ครั้งแรกเมื่อไร และลงกี่ครั้ง
+  function stamps(trips) {
+    const out = {};
+    for (const t of [...trips].reverse()) {
+      if (!(t.minutesDone > 0)) continue;
+      const s = out[t.alightedAt] || (out[t.alightedAt] = { first: t.endedAt, count: 0 });
+      s.count++;
+    }
+    return out;
+  }
+
+  // สรุป 7 วันล่าสุด (เก่า → ใหม่) และแยกตามวิชา
+  function week(trips, now = Date.now()) {
+    const today = dayKey(now);
+    const keys = Array.from({ length: 7 }, (_, i) => addDays(today, i - 6));
+    const inWeek = trips.filter(t => keys.includes(dayKey(t.endedAt)));
+    const days = keys.map(key => ({ key, minutes: minutesOn(inWeek, key) }));
+    const subj = {};
+    for (const t of inWeek) {
+      const name = t.subject || 'ไม่ได้ระบุวิชา';
+      subj[name] = (subj[name] || 0) + t.minutesDone;
+    }
+    const subjects = Object.entries(subj).filter(([, m]) => m > 0)
+      .map(([name, minutes]) => ({ name, minutes })).sort((a, b) => b.minutes - a.minutes);
+    return { days, subjects, total: days.reduce((a, d) => a + d.minutes, 0) };
+  }
+
   function defaults() {
-    return { v: 2, here: 'kta', subject: '', trips: [], active: null, sound: true };
+    return { v: 2, here: 'kta', subject: '', trips: [], active: null, rest: null, sound: true };
   }
 
   class Store {
@@ -106,7 +133,7 @@
     }
   }
 
-  const api = { Store, dayKey, streak, minutesOn, browserBackend };
+  const api = { Store, dayKey, addDays, streak, minutesOn, stamps, week, browserBackend };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.TrainStore = api;
 })(typeof window !== 'undefined' ? window : globalThis);

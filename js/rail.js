@@ -41,7 +41,22 @@
     srt: { name: 'สุราษฎร์ธานี', en: 'Surat Thani', province: 'สุราษฎร์ธานี', km: 644, scene: 'palm' },
     tsg: { name: 'ชุมทางทุ่งสง', en: 'Thung Song Jn.', province: 'นครศรีธรรมราช', km: 766, scene: 'palm' },
     ptl: { name: 'พัทลุง', en: 'Phatthalung', province: 'พัทลุง', km: 839, scene: 'palm' },
-    hdy: { name: 'ชุมทางหาดใหญ่', en: 'Hat Yai Jn.', province: 'สงขลา', km: 938, scene: 'palm' }
+    hdy: { name: 'ชุมทางหาดใหญ่', en: 'Hat Yai Jn.', province: 'สงขลา', km: 938, scene: 'palm' },
+    yla: { name: 'ยะลา', en: 'Yala', province: 'ยะลา', km: 1048, scene: 'palm' },
+    skl: { name: 'สุไหงโก-ลก', en: 'Sungai Kolok', province: 'นราธิวาส', km: 1152, scene: 'palm' },
+    npd: { name: 'ชุมทางหนองปลาดุก', en: 'Nong Pla Duk Jn.', province: 'ราชบุรี', km: 73, scene: 'plain' },
+    // สายน้ำตก (แยกจากสายใต้ที่หนองปลาดุก)
+    kbi: { name: 'กาญจนบุรี', en: 'Kanchanaburi', province: 'กาญจนบุรี', km: 126, scene: 'plain' },
+    rkb: { name: 'สะพานข้ามแม่น้ำแคว', en: 'River Kwai Bridge', province: 'กาญจนบุรี', km: 129, scene: 'plain' },
+    tks: { name: 'ถ้ำกระแซ', en: 'Tham Krasae', province: 'กาญจนบุรี', km: 178, scene: 'hills' },
+    ntk: { name: 'น้ำตก', en: 'Nam Tok', province: 'กาญจนบุรี', km: 203, scene: 'mountain' },
+    // สายตะวันออก
+    lkb: { name: 'ลาดกระบัง', en: 'Lat Krabang', province: 'กรุงเทพมหานคร', km: 35, scene: 'city' },
+    cco: { name: 'ชุมทางฉะเชิงเทรา', en: 'Chachoengsao Jn.', province: 'ฉะเชิงเทรา', km: 66, scene: 'plain' },
+    pcb: { name: 'ปราจีนบุรี', en: 'Prachin Buri', province: 'ปราจีนบุรี', km: 127, scene: 'plain' },
+    kbr: { name: 'กบินทร์บุรี', en: 'Kabin Buri', province: 'ปราจีนบุรี', km: 166, scene: 'hills' },
+    skw: { name: 'สระแก้ว', en: 'Sa Kaeo', province: 'สระแก้ว', km: 203, scene: 'plain' },
+    arn: { name: 'อรัญประเทศ', en: 'Aranyaprathet', province: 'สระแก้ว', km: 260, scene: 'plain' }
   };
 
   // พิกัดสถานีโดยประมาณ [ลองจิจูด, ละติจูด]
@@ -54,7 +69,11 @@
     bya: [102.4300, 15.5840], kkn: [102.8240, 16.4320], udn: [102.7990, 17.4100], nki: [102.7370, 17.8580],
     npt: [100.0600, 13.8230], rbr: [99.8150, 13.5410], pbi: [99.9440, 13.1130], hhn: [99.9580, 12.5680],
     pkn: [99.7980, 11.8080], cpn: [99.1730, 10.4980], srt: [99.2290, 9.1180], tsg: [99.6790, 8.1640],
-    ptl: [100.0770, 7.6170], hdy: [100.4720, 7.0060]
+    ptl: [100.0770, 7.6170], hdy: [100.4720, 7.0060], yla: [101.2840, 6.5450], skl: [101.9670, 6.0310],
+    npd: [99.9350, 13.8300], kbi: [99.5283, 14.0283], rkb: [99.5040, 14.0410], tks: [99.1590, 14.1230],
+    ntk: [99.0640, 14.2240],
+    lkb: [100.7490, 13.7270], cco: [101.0600, 13.6900], pcb: [101.3700, 14.0480], kbr: [101.7120, 13.9700],
+    skw: [102.0660, 13.8070], arn: [102.5050, 13.6930]
   };
   Object.keys(STATIONS).forEach(id => { STATIONS[id].lngLat = COORDS[id]; });
 
@@ -67,15 +86,19 @@
     { id: 'northeast', name: 'สายตะวันออกเฉียงเหนือ', color: '#8a5a12',
       stops: ['kta', 'dmk', 'aya', 'bpc', 'srb', 'kkj', 'pkc', 'nma', 'bya', 'kkn', 'udn', 'nki'] },
     { id: 'south', name: 'สายใต้', color: '#1f6a4a',
-      stops: ['kta', 'npt', 'rbr', 'pbi', 'hhn', 'pkn', 'cpn', 'srt', 'tsg', 'ptl', 'hdy'] }
+      stops: ['kta', 'npt', 'npd', 'rbr', 'pbi', 'hhn', 'pkn', 'cpn', 'srt', 'tsg', 'ptl', 'hdy', 'yla', 'skl'] },
+    { id: 'namtok', name: 'สายน้ำตก', color: '#5b3f8c',
+      stops: ['kta', 'npt', 'npd', 'kbi', 'rkb', 'tks', 'ntk'] },
+    { id: 'east', name: 'สายตะวันออก', color: '#8c2f55',
+      stops: ['kta', 'lkb', 'cco', 'pcb', 'kbr', 'skw', 'arn'] }
   ];
 
   // ประเภทขบวน: ความเร็ว (กม. ต่อ นาทีของการอ่าน) — ขบวนเร็วกว่า = อ่านสั้นกว่าในระยะทางเดียวกัน
   const SERVICES = [
-    { id: 'special', type: 'ด่วนพิเศษ', speed: 4, base: 7 },
-    { id: 'express', type: 'ด่วน', speed: 3, base: 51 },
-    { id: 'rapid', type: 'เร็ว', speed: 2, base: 105 },
-    { id: 'ordinary', type: 'ธรรมดา', speed: 1.5, base: 201 }
+    { id: 'special', type: 'ด่วนพิเศษ', speed: 8, base: 7 },
+    { id: 'express', type: 'ด่วน', speed: 6, base: 51 },
+    { id: 'rapid', type: 'เร็ว', speed: 4, base: 105 },
+    { id: 'ordinary', type: 'ธรรมดา', speed: 3, base: 201 }
   ];
 
   const MIN_MINUTES = 5;

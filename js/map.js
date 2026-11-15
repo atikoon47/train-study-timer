@@ -4,8 +4,8 @@
  * ถ้าโหลดไลบรารีไม่ได้ (ออฟไลน์) RailMap.available = false แล้วแอปจะใช้รายการสถานีกับวิวหน้าต่างแทน
  */
 const THAILAND = [[97.3, 5.6], [105.7, 20.5]];
-const MAJOR = new Set(['kta', 'nsw', 'psl', 'lpg', 'cmi', 'nma', 'kkn', 'udn', 'nki', 'hhn', 'cpn', 'srt', 'hdy']);
-const LINE_COLORS = { north: '#5b9bff', northeast: '#f0a83a', south: '#3fc28a' };
+const MAJOR = new Set(['kta', 'nsw', 'psl', 'lpg', 'cmi', 'nma', 'kkn', 'udn', 'nki', 'hhn', 'cpn', 'srt', 'hdy', 'skl', 'kbi']);
+const LINE_COLORS = { north: '#5b9bff', northeast: '#f0a83a', south: '#3fc28a', namtok: '#b48cff', east: '#ef6f9c' };
 
 // สถานีบนทางร่วม (อยู่หลายสาย เช่น ดอนเมือง อยุธยา บ้านภาชี) ใช้สีกลาง
 const SHARED_COLOR = '#c9d1db';
@@ -61,7 +61,7 @@ class RailMap {
       type: 'FeatureCollection',
       features: Rail.LINES.map(l => ({
         // สายเหนือกับอีสานใช้รางร่วมกันถึงบ้านภาชี วาดเยื้องกันให้เห็นเป็นสองเส้นคู่กัน
-        type: 'Feature', properties: { color: LINE_COLORS[l.id], offset: { north: -2.5, northeast: 2.5 }[l.id] || 0 },
+        type: 'Feature', properties: { color: LINE_COLORS[l.id], offset: { north: -2.5, northeast: 2.5, south: -2.5, namtok: 2.5 }[l.id] || 0 },
         geometry: { type: 'LineString', coordinates: l.stops.map(id => Rail.STATIONS[id].lngLat) }
       }))
     };
@@ -74,6 +74,13 @@ class RailMap {
       paint: { 'line-color': ['get', 'color'], 'line-offset': ['get', 'offset'], 'line-width': ['interpolate', ['linear'], ['zoom'], 5, 2.5, 10, 4] } });
 
     const empty = { type: 'FeatureCollection', features: [] };
+    // เส้นทางที่เคยนั่งแล้ว: จุดสีทองไล่ตามราง ค่อยๆ เติมเต็มแผนที่ยิ่งเดินทางมาก
+    m.addSource('ridden', { type: 'geojson', data: empty });
+    m.addLayer({ id: 'ridden', type: 'line', source: 'ridden',
+      layout: { 'line-join': 'round', 'line-cap': 'round' },
+      paint: { 'line-color': '#ffd58a', 'line-opacity': 0.85, 'line-dasharray': [0.1, 2],
+        'line-width': ['interpolate', ['linear'], ['zoom'], 5, 2.5, 10, 4] } });
+    if (this.riddenTrips) this.showRidden(this.riddenTrips);
     m.addSource('route', { type: 'geojson', data: empty, lineMetrics: true });
     m.addLayer({ id: 'route-glow', type: 'line', source: 'route',
       layout: { 'line-join': 'round', 'line-cap': 'round' },
@@ -128,6 +135,24 @@ class RailMap {
     } catch (e) { /* ไม่รองรับก็ข้าม */ }
     const attrib = this.el.querySelector('.maplibregl-ctrl-attrib');
     if (attrib) attrib.classList.remove('maplibregl-compact-show');
+  }
+
+  // trips: ประวัติจาก store — วาดทุกช่วงที่เคยนั่งจริง (ต้นทาง ถึง สถานีที่ลง)
+  showRidden(trips) {
+    this.riddenTrips = trips;
+    let src = null;
+    try { src = this.map.getSource('ridden'); } catch (e) { /* แผนที่ยังโหลดไม่เสร็จ: setup() จะวาดให้ทีหลัง */ }
+    if (!src) return;
+    const seen = new Set();
+    const features = [];
+    for (const t of trips) {
+      const key = t.from + '>' + t.alightedAt;
+      if (t.from === t.alightedAt || seen.has(key)) continue;
+      seen.add(key);
+      const r = Rail.route(t.from, t.alightedAt);
+      if (r) features.push({ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: Rail.routeLine(r) } });
+    }
+    src.setData({ type: 'FeatureCollection', features });
   }
 
   padding() {

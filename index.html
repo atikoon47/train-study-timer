@@ -92,7 +92,22 @@
     <div id="arrive-sign" class="arrive-sign"></div>
     <div id="arrive-ticket" class="arrive-ticket"></div>
     <dl id="arrive-stats" class="stats"></dl>
-    <button id="btn-again" class="btn-primary" type="button">วางแผนเที่ยวต่อไป</button>
+    <div class="actions-row">
+      <button id="btn-rest" class="btn-quiet" type="button">พักที่สถานี 5 นาที</button>
+      <button id="btn-again" class="btn-primary" type="button">วางแผนเที่ยวต่อไป</button>
+    </div>
+  </section>
+
+  <!-- พักที่สถานี (ระหว่างรอบอ่าน) -->
+  <section id="panel-rest" class="sheet-panel" aria-label="พักที่สถานี" hidden>
+    <p id="rest-lead" class="arrive-lead">พักที่สถานี</p>
+    <div id="rest-sign" class="arrive-sign"></div>
+    <div id="rest-time" class="hud-time" role="timer" aria-live="off">05:00</div>
+    <p id="rest-tip" class="rest-tip"></p>
+    <div class="actions-row">
+      <button id="btn-rest-more" class="btn-quiet" type="button">พักเพิ่ม 5 นาที</button>
+      <button id="btn-rest-end" class="btn-primary" type="button">ขึ้นขบวนต่อไป</button>
+    </div>
   </section>
 
   <!-- ตั๋ว -->
@@ -135,6 +150,17 @@
       <button class="glass-btn" type="button" data-close aria-label="ปิด"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
     </div>
     <dl id="log-stats" class="stats two"></dl>
+    <section class="log-sec" aria-labelledby="wk-title">
+      <h3 id="wk-title">7 วันล่าสุด <span id="wk-total" class="dim"></span></h3>
+      <div id="wk-chart" class="wk-chart"></div>
+      <ul id="wk-subjects" class="wk-subjects"></ul>
+    </section>
+    <section class="log-sec" aria-labelledby="stamp-title">
+      <h3 id="stamp-title">ตราประทับสถานี <span id="stamp-count" class="dim"></span></h3>
+      <p class="log-note">ลงจากรถที่สถานีไหนก็ได้ตราประทับสถานีนั้น เส้นจุดสีทองบนแผนที่คือเส้นทางที่เคยนั่งแล้ว</p>
+      <div id="stamp-book" class="stamp-book"></div>
+    </section>
+    <h3 class="log-h">การเดินทางล่าสุด</h3>
     <ol id="log-trips" class="log-trips"></ol>
     <button id="btn-reset" class="link-btn danger" type="button">ลบประวัติทั้งหมด</button>
   </dialog>

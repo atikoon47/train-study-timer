@@ -26,10 +26,14 @@ const app = {
       document.body.classList.add('no-map');
     }
 
+    if (this.map) this.map.showRidden(store.state.trips);
+
     const active = store.state.active;
     if (active) {
       if (Date.now() >= active.endTime) this.arrive(active, active.endTime);
       else this.ride(active);
+    } else if (store.state.rest) {
+      this.rest();
     } else {
       this.plan();
     }
@@ -40,7 +44,7 @@ const app = {
   },
 
   show(panel) {
-    ['plan', 'ride', 'arrive'].forEach(p => { $('panel-' + p).hidden = p !== panel; });
+    ['plan', 'ride', 'arrive', 'rest'].forEach(p => { $('panel-' + p).hidden = p !== panel; });
     document.body.dataset.screen = panel;
   },
 
@@ -59,6 +63,9 @@ const app = {
     $('btn-alight').onclick = () => this.askAlight();
     $('btn-alight-confirm').onclick = () => this.alight();
     $('btn-again').onclick = () => { this.dest = null; this.plan(); };
+    $('btn-rest').onclick = () => this.startRest(5);
+    $('btn-rest-more').onclick = () => this.startRest(5, true);
+    $('btn-rest-end').onclick = () => this.endRest();
     $('btn-view').onclick = () => this.toggleWindow();
     $('btn-recenter').onclick = () => { if (this.map) { this.map.setFollow(true); this.map.updateRide(this.kmAt(Date.now()), 'ease'); } };
     $('btn-log').onclick = () => this.openLog();
@@ -76,6 +83,7 @@ const app = {
     });
 
     document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && store.state.rest) this.restTick();
       if (!store.state.active) return;
       if (document.hidden) { this.scene && this.scene.stop(); }
       else { this.tick(); if (this.windowView) this.scene.start(); this.lockScreen(); }
@@ -178,7 +186,7 @@ const app = {
   },
 
   tapStation(id) {
-    if (store.state.active) return;
+    if (store.state.active || document.body.dataset.screen === 'rest') return;
     if (document.body.dataset.screen === 'arrive') this.show('plan');
     if (id === store.state.here) { this.map && this.map.focusStation(id); return; }
     if (id === this.dest) { this.clearDest(); return; } // แตะปลายทางเดิมซ้ำ = ยกเลิก
@@ -272,7 +280,7 @@ const app = {
   depart() {
     const now = Date.now();
     const trip = { ...this.draft, id: 'trip-' + now, departAt: now, startedAt: now, endTime: now + this.draft.minutes * 60000 };
-    store.set({ active: trip });
+    store.set({ active: trip, rest: null });
     soundEffects.playWhistle();
     if ('Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission().catch(() => {});
@@ -439,8 +447,71 @@ const app = {
     this.whenMap(() => {
       this.map.markStations(rec.alightedAt, null, null);
       this.map.showRoute(null);
+      this.map.showRidden(store.state.trips);
       this.map.arriveAt(rec.alightedAt);
     });
+  },
+
+  // ---------- พักที่สถานี (ระหว่างรอบอ่าน) ----------
+  startRest(minutes, extend = false) {
+    const now = Date.now();
+    const cur = store.state.rest;
+    const base = extend && cur ? Math.max(now, cur.endTime) : now;
+    store.set({ rest: { at: store.state.here, endTime: base + minutes * 60000 } });
+    this.rest();
+  },
+
+  rest() {
+    const r = store.state.rest;
+    this.show('rest');
+    this.dest = null;
+    $('rest-sign').innerHTML = this.signHTML(r.at);
+    const tips = ['ลุกขึ้นยืดเส้นยืดสาย', 'ดื่มน้ำสักแก้ว', 'มองไกลๆ พักสายตาจากจอ', 'สูดหายใจลึกๆ ช้าๆ', 'เดินเล่นสั้นๆ ให้เลือดหมุนเวียน'];
+    $('rest-tip').textContent = tips[Math.floor(Math.random() * tips.length)];
+    this.restDone = Date.now() >= r.endTime;
+    clearInterval(this.restTimer);
+    this.restTimer = setInterval(() => this.restTick(), 250);
+    this.restTick();
+    this.whenMap(() => {
+      this.map.markStations(r.at, null, null);
+      this.map.showRoute(null);
+      this.map.focusStation(r.at);
+    });
+  },
+
+  restTick() {
+    const r = store.state.rest;
+    if (!r) return;
+    const left = Math.max(0, Math.ceil((r.endTime - Date.now()) / 1000));
+    if (left > 0) {
+      const txt = `${String(Math.floor(left / 60)).padStart(2, '0')}:${String(left % 60).padStart(2, '0')}`;
+      $('rest-time').textContent = txt;
+      $('rest-lead').textContent = 'พักที่สถานี';
+      document.title = `พัก ${txt}`;
+      this.restDone = false;
+      return;
+    }
+    $('rest-time').textContent = '00:00';
+    $('rest-lead').textContent = 'หมดเวลาพักแล้ว ได้เวลาขึ้นขบวนต่อไป';
+    document.title = 'หมดเวลาพัก';
+    if (this.restDone) return;
+    this.restDone = true; // แจ้งครั้งเดียว
+    soundEffects.playWhistle();
+    soundEffects.vibrate([60, 40, 60]);
+    try {
+      if ('Notification' in window && Notification.permission === 'granted' && document.hidden) {
+        new Notification('หมดเวลาพักแล้ว', { body: 'ได้เวลาขึ้นขบวนต่อไป', icon: 'icon.svg' });
+      }
+    } catch (e) { /* ข้ามได้ */ }
+  },
+
+  endRest() {
+    clearInterval(this.restTimer);
+    this.restTimer = null;
+    store.set({ rest: null });
+    document.title = 'ตั๋วอ่านหนังสือ';
+    this.dest = null;
+    this.plan();
   },
 
   // ---------- สมุดเดินทาง ----------
@@ -451,6 +522,8 @@ const app = {
       <div><dt>อ่านต่อเนื่อง</dt><dd>${s.streak} วัน</dd></div>
       <div><dt>เวลาอ่านทั้งหมด</dt><dd>${fmtMinutes(s.totalMinutes)}</dd></div>
       <div><dt>ระยะทางรวม</dt><dd>${s.totalKm.toLocaleString('th-TH')} กม.</dd></div>`;
+    this.renderWeek();
+    this.renderStamps();
     const trips = store.state.trips.slice(0, 40);
     $('log-trips').innerHTML = trips.length ? trips.map(t => `
       <li>
@@ -465,6 +538,40 @@ const app = {
     $('dlg-log').showModal();
   },
 
+  renderWeek() {
+    const w = TrainStore.week(store.state.trips);
+    const max = Math.max(30, ...w.days.map(d => d.minutes));
+    const todayKey = TrainStore.dayKey(Date.now());
+    $('wk-total').textContent = w.total ? `รวม ${fmtMinutes(w.total)}` : '';
+    $('wk-chart').setAttribute('role', 'img');
+    $('wk-chart').setAttribute('aria-label', '7 วันล่าสุด ' + w.days.map(d => `${dayLabel(d.key, 'long')} ${fmtMinutes(d.minutes)}`).join(', '));
+    $('wk-chart').innerHTML = w.days.map(d => `
+      <div class="wk-day${d.key === todayKey ? ' today' : ''}" title="${dayLabel(d.key, 'long')}: ${fmtMinutes(d.minutes)}">
+        <span class="wk-v">${d.minutes ? (d.minutes >= 60 ? (d.minutes / 60).toFixed(1).replace('.0', '') + 'ช' : d.minutes) : ''}</span>
+        <div class="wk-track"><div class="wk-bar" style="height:${d.minutes ? Math.max(4, (d.minutes / max) * 100) : 0}%"></div></div>
+        <span class="wk-d">${dayLabel(d.key, 'narrow')}</span>
+      </div>`).join('');
+    const top = w.subjects[0] ? w.subjects[0].minutes : 1;
+    $('wk-subjects').innerHTML = w.subjects.map(s => `
+      <li><span class="ws-name">${esc(s.name)}</span><span class="ws-bar"><i style="width:${(s.minutes / top) * 100}%"></i></span><span class="ws-min">${fmtMinutes(s.minutes)}</span></li>`).join('')
+      || '<li class="empty">ยังไม่มีการอ่านในสัปดาห์นี้</li>';
+  },
+
+  renderStamps() {
+    const got = TrainStore.stamps(store.state.trips);
+    const order = [];
+    Rail.LINES.forEach(l => l.stops.forEach(id => { if (!order.includes(id)) order.push(id); }));
+    $('stamp-count').textContent = `${Object.keys(got).length}/${order.length}`;
+    $('stamp-book').innerHTML = order.map((id, i) => {
+      const s = Rail.STATIONS[id], g = got[id];
+      const tilt = ((i * 37) % 17) - 8; // เอียงไม่เท่ากันเหมือนประทับด้วยมือ
+      return g
+        ? `<div class="stamp got" style="--c:${stationColor(id)};--tilt:${tilt}deg" title="${esc(s.name)}: ลง ${g.count} ครั้ง ครั้งแรก ${thaiDate(g.first)}">
+            <b>${Rail.code(id)}</b><span>${esc(s.name)}</span><small>${thaiDate(g.first)}</small>${g.count > 1 ? `<em>×${g.count}</em>` : ''}</div>`
+        : `<div class="stamp" title="${esc(s.name)}: ยังไม่เคยลง"><b>${Rail.code(id)}</b><span>${esc(s.name)}</span></div>`;
+    }).join('');
+  },
+
   reset(btn) {
     if (!btn.dataset.armed) {
       btn.dataset.armed = '1';
@@ -472,11 +579,17 @@ const app = {
       return;
     }
     store.reset();
+    if (this.map) this.map.showRidden([]);
     $('dlg-log').close();
     this.dest = null;
     this.plan();
   }
 };
+
+function dayLabel(key, style) {
+  const [y, m, d] = key.split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString('th-TH', style === 'long' ? { weekday: 'long', day: 'numeric', month: 'short' } : { weekday: 'narrow' });
+}
 
 function fmtMinutes(m) {
   if (m < 60) return `${m} นาที`;

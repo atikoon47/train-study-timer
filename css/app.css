@@ -443,3 +443,51 @@ body[data-screen="ride"] .wordmark { display: none; }
 .window .scene .tunnel { z-index: 2; }
 /* หน้าต่างบนมือถือสูงกว่าฉาก: ขยายวิวให้ภูมิประเทศเต็มบานหน้าต่างมากขึ้น */
 .window .scene .set, .window .scene .near, .window .scene .lights, .window .scene .plats, .window .scene .track { zoom: 1.35; }
+
+/* ---------- ปุ่มคู่ท้ายแผง / พักที่สถานี ---------- */
+.actions-row { display: flex; gap: 10px; align-items: stretch; }
+.actions-row .btn-primary { flex: 1; width: auto; }
+.actions-row .btn-quiet { min-height: 54px; border-radius: 16px; }
+.rest-tip { color: var(--dim); margin: 6px 0 20px; }
+#panel-rest .hud-time { margin: 0; font-variant-numeric: tabular-nums; }
+
+/* ---------- สมุดเดินทาง: สรุป 7 วัน + ตราประทับ ---------- */
+.log-sec { padding: 18px 0; border-bottom: 1px solid var(--hair); }
+.log-sec h3, .log-h { font-size: 1rem; font-weight: 600; margin-bottom: 12px; }
+.log-h { margin-top: 18px; }
+.log-sec h3 .dim { font-weight: 400; font-size: .85rem; margin-left: 6px; }
+.log-note { color: var(--dim); font-size: .8rem; margin: -6px 0 12px; }
+.dim { color: var(--dim); }
+
+.wk-chart { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; height: 132px; }
+.wk-day { display: grid; grid-template-rows: 18px 1fr 20px; text-align: center; min-width: 0; }
+.wk-v { font-size: .7rem; color: var(--dim); font-variant-numeric: tabular-nums; }
+.wk-track { position: relative; background: rgba(255,255,255,.04); border-radius: 6px; overflow: hidden; }
+.wk-bar { position: absolute; left: 0; right: 0; bottom: 0; background: #8d97a3; border-radius: 6px 6px 0 0; }
+.wk-day.today .wk-bar { background: var(--text); }
+.wk-day.today .wk-d { color: var(--text); font-weight: 600; }
+.wk-d { font-size: .75rem; color: var(--dim); padding-top: 4px; }
+.wk-subjects { list-style: none; margin-top: 14px; display: grid; gap: 8px; }
+.wk-subjects li { display: grid; grid-template-columns: minmax(0, 7.5em) 1fr auto; gap: 10px; align-items: center; font-size: .85rem; }
+.wk-subjects li.empty { display: block; color: var(--dim); }
+.ws-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ws-bar { height: 6px; background: rgba(255,255,255,.08); border-radius: 3px; overflow: hidden; }
+.ws-bar i { display: block; height: 100%; background: var(--text); border-radius: 3px; }
+.ws-min { color: var(--dim); font-variant-numeric: tabular-nums; }
+
+.stamp-book { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 10px; }
+.stamp {
+  position: relative; aspect-ratio: 1; border-radius: 50%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+  border: 1.5px dashed rgba(255,255,255,.12); color: rgba(255,255,255,.22); padding: 6px;
+}
+.stamp b { font-size: .95rem; letter-spacing: .06em; }
+.stamp span { font-size: .62rem; line-height: 1.2; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.stamp small { font-size: .55rem; opacity: .8; }
+.stamp.got {
+  color: var(--c); border: 2.5px solid var(--c); transform: rotate(var(--tilt));
+  box-shadow: inset 0 0 0 3px rgba(0,0,0,.25), inset 0 0 0 4.5px var(--c);
+  background: color-mix(in srgb, var(--c) 8%, transparent);
+}
+.stamp em { position: absolute; right: -2px; top: -2px; font-style: normal; font-size: .62rem; font-weight: 700;
+  background: var(--c); color: var(--night); border-radius: 999px; padding: 1px 6px; }
