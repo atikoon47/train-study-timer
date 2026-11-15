@@ -1,0 +1,118 @@
+/* ฉากวิวหน้าต่าง (มุมมองด้านข้าง) */
+.scene { position: relative; overflow: hidden; height: 100%; }
+/* โทนภาพแบบถ่ายจริง: ฟ้านุ่ม สีหม่น มีหมอกตามระยะ เข้ากับ UI โทนมืด */
+.scene { --haze: 198, 214, 222; --haze-a: .5; --air: 14, 17, 22; }
+.sky { position: absolute; inset: 0; background: linear-gradient(#6f97ad 0%, #a9c3cd 55%, #d3dcda 100%); transition: background 2s; }
+.sun { position: absolute; width: 46px; height: 46px; border-radius: 50%; right: 16%; top: 14%; background: #fbf4e2; box-shadow: 0 0 60px 28px rgba(251,244,226,.35); opacity: .9; }
+.scene[data-tod="dawn"] { --haze: 226, 196, 170; --haze-a: .55; }
+.scene[data-tod="dawn"] .sky { background: linear-gradient(#4f6684 0%, #a99aa0 50%, #e4bf9c 100%); }
+.scene[data-tod="dawn"] .sun { top: 50%; background: #ffd9ac; box-shadow: 0 0 70px 34px rgba(255,200,150,.35); }
+.scene[data-tod="dusk"] { --haze: 214, 160, 132; --haze-a: .5; }
+.scene[data-tod="dusk"] .sky { background: linear-gradient(#3b4466 0%, #8d7286 50%, #d99a76 100%); }
+.scene[data-tod="dusk"] .sun { top: 48%; right: 70%; background: #ffc08a; box-shadow: 0 0 80px 36px rgba(255,160,100,.35); }
+.scene[data-tod="night"] { --haze: 18, 26, 42; --haze-a: .45; }
+.scene[data-tod="night"] .sky { background: linear-gradient(#070b14 0%, #121b2c 60%, #1e2a3e 100%); }
+.scene[data-tod="night"] .sun { width: 22px; height: 22px; background: #e3e8f0; box-shadow: 0 0 30px 10px rgba(227,232,240,.18); }
+
+/* สีหม่นของแต่ละชั้นอบไว้ในภาพแล้ว (scene.js) — ห้ามใส่ CSS filter บนชั้นที่เลื่อน เพราะต้องวาดใหม่ทุกเฟรม */
+.haze {
+  position: absolute; left: 0; right: 0; bottom: 44px; height: 200px; pointer-events: none;
+  background: linear-gradient(to top, rgba(var(--haze), var(--haze-a)) 0%, rgba(var(--haze), calc(var(--haze-a) * .5)) 45%, transparent 100%);
+}
+/* แสงตามเวลา: แผ่นสีโปร่งแสงนิ่งๆ ทับวิว (ถูกกว่า filter มาก) */
+.tint { position: absolute; inset: 0; pointer-events: none; background: transparent; transition: background 2s; }
+.scene[data-tod="dawn"] .tint { background: linear-gradient(rgba(70,50,90,.05), rgba(120,70,60,.16)); }
+.scene[data-tod="dusk"] .tint { background: linear-gradient(rgba(60,40,80,.12), rgba(70,35,50,.32)); }
+.scene[data-tod="night"] .tint { background: linear-gradient(rgba(6,10,24,.55), rgba(4,7,16,.78)); }
+/* เกรดสีรวม: ขอบล่างมืดลงเข้ากับพื้นหลังแอป */
+.air {
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(to bottom, rgba(var(--air), .12), transparent 30%, transparent 70%, rgba(var(--air), .3));
+}
+
+/* แสงแดดฟุ้งรอบดวงอาทิตย์ */
+.sun::after { content: ''; position: absolute; left: 50%; top: 50%; width: 420px; height: 420px; transform: translate(-50%, -50%);
+  border-radius: 50%; background: radial-gradient(rgba(255,244,214,.22), transparent 62%); pointer-events: none; }
+.scene[data-tod="night"] .sun::after { background: radial-gradient(rgba(200,215,240,.10), transparent 55%); }
+
+/* ดาว (กลางคืนเท่านั้น) */
+.stars { position: absolute; inset: 0 0 40% 0; opacity: 0; transition: opacity 2s; pointer-events: none;
+  background-image:
+    radial-gradient(1.2px 1.2px at 8% 18%, #fff, transparent), radial-gradient(1px 1px at 17% 42%, #dfe7ff, transparent),
+    radial-gradient(1.4px 1.4px at 26% 12%, #fff, transparent), radial-gradient(1px 1px at 33% 30%, #fff, transparent),
+    radial-gradient(1px 1px at 41% 8%, #cfdcff, transparent), radial-gradient(1.3px 1.3px at 49% 36%, #fff, transparent),
+    radial-gradient(1px 1px at 57% 20%, #fff, transparent), radial-gradient(1.2px 1.2px at 63% 46%, #e8eeff, transparent),
+    radial-gradient(1px 1px at 72% 10%, #fff, transparent), radial-gradient(1.4px 1.4px at 88% 28%, #fff, transparent),
+    radial-gradient(1px 1px at 94% 50%, #dfe7ff, transparent), radial-gradient(1px 1px at 4% 55%, #fff, transparent),
+    radial-gradient(1px 1px at 21% 62%, #fff, transparent), radial-gradient(1.2px 1.2px at 46% 58%, #fff, transparent),
+    radial-gradient(1px 1px at 79% 60%, #fff, transparent), radial-gradient(1px 1px at 68% 33%, #fff, transparent); }
+.scene[data-tod="night"] .stars { opacity: .9; animation: twinkle 5s ease-in-out infinite alternate; }
+@keyframes twinkle { to { opacity: .6; } }
+
+.layer.clouds { top: 4%; height: 150px; width: calc(100% + 1600px); opacity: .9; }
+.scene[data-tod="dusk"] .layer.clouds { opacity: .55; }
+.scene[data-tod="night"] .layer.clouds { opacity: .08; }
+
+/* ไฟบ้าน/ไฟทาง: เห็นตอนค่ำ */
+.layer.lights { bottom: 44px; height: 120px; width: calc(100% + 900px); opacity: 0; transition: opacity 2s; }
+.scene[data-tod="dusk"] .layer.lights { opacity: .45; }
+.scene[data-tod="night"] .layer.lights { opacity: 1; }
+/* ชานชาลากลางคืนมีไฟส่อง */
+.scene[data-tod="night"] .plat::before { content: ''; position: absolute; left: 30px; right: 30px; top: -30px; bottom: -10px;
+  background: radial-gradient(ellipse at 50% 20%, rgba(255,226,170,.35), transparent 65%); }
+
+/* นก */
+.birds { position: absolute; left: 100%; top: 18%; opacity: 0; pointer-events: none; }
+.birds.fly { animation: birds-cross 24s linear forwards; }
+@keyframes birds-cross { 0% { opacity: 0; transform: translate(0, 0); } 5%, 92% { opacity: .8; } 100% { opacity: 0; transform: translate(calc(-1 * var(--w, 1200px)), -40px); } }
+.bird { transform-box: fill-box; transform-origin: center; animation: flap .42s ease-in-out infinite alternate; }
+@keyframes flap { to { transform: scaleY(-.6); } }
+.scene[data-tod="dusk"] .bird path { stroke: #1d1a22; }
+
+/* ทั้งฉากสั่นเบาๆ ตามจังหวะราง (สั่นที่กล่องครอบ ไม่ทับ transform ของชั้นที่เลื่อน) */
+.rock { position: absolute; inset: 0; }
+.scene.moving .rock { animation: sway 1.6s ease-in-out infinite alternate; }
+
+.set { position: absolute; inset: 0; opacity: 0; transition: opacity 2.5s ease; }
+.set.on { opacity: 1; }
+.layer { position: absolute; left: 0; background-repeat: repeat-x; will-change: transform; }
+.layer.far  { bottom: 84px; height: 170px; width: calc(100% + 1200px); }
+.layer.mid  { bottom: 44px; height: 120px; width: calc(100% + 900px); }
+.layer.near { bottom: 30px; height: 130px; width: calc(100% + 1260px); }
+
+.plats { position: absolute; inset: 0; pointer-events: none; }
+.plat-wrap { position: absolute; left: 0; bottom: 30px; will-change: transform; }
+.plat { position: relative; width: 300px; height: 120px; }
+.plat-slab { position: absolute; left: 0; right: 0; bottom: 0; height: 16px; background: #8f8d86; border-top: 4px solid #c9ad4f; }
+.plat-posts { position: absolute; left: 92px; width: 116px; bottom: 16px; height: 58px; border-inline: 5px solid #3a3f3c; }
+.plat-sign {
+  position: absolute; left: 70px; width: 160px; top: 0;
+  background: var(--enamel); color: var(--sign-blue);
+  border: 3px solid var(--sign-blue); border-radius: 2px;
+  text-align: center; padding: 3px 4px;
+}
+.plat-sign b { display: block; font-size: 1.05rem; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.plat-sign small { display: block; font-size: .62rem; font-weight: 600; letter-spacing: .03em; }
+
+.track { position: absolute; left: 0; right: 0; bottom: 0; height: 36px; background: #4d4943; overflow: hidden; }
+.track::before { content: ''; position: absolute; inset: 0 0 auto; height: 8px; background: #5f5a52; }
+.sleepers {
+  position: absolute; left: 0; top: 10px; height: 8px; width: calc(100% + 56px);
+  background: repeating-linear-gradient(90deg, #4b3c2e 0 12px, transparent 12px 28px);
+  will-change: transform;
+}
+.track::after { content: ''; position: absolute; left: 0; right: 0; top: 9px; height: 3px; background: #c9c7c0; box-shadow: 0 1px 0 #555; }
+
+/* มองจากในตู้: ภาพสั่นเบาๆ ตามจังหวะราง */
+@keyframes sway { 30% { transform: translateY(1px); } 100% { transform: translateY(-1px); } }
+
+/* อุโมงค์: มืดสนิท มีไฟในอุโมงค์วิ่งผ่านเป็นจังหวะ */
+.tunnel { position: absolute; inset: 0; background: #07090b; opacity: 0; transition: opacity .35s; pointer-events: none; overflow: hidden; }
+.tunnel i {
+  position: absolute; left: 0; top: 34%; height: 6px; width: calc(100% + 260px);
+  background: repeating-linear-gradient(90deg, transparent 0 220px, rgba(255,214,140,.85) 220px 240px, transparent 240px 260px);
+  filter: blur(2px);
+}
+.scene.in-tunnel .tunnel { opacity: 1; }
+.scene.in-tunnel .tunnel i { animation: tunnel-lights .55s linear infinite; }
+@keyframes tunnel-lights { to { transform: translateX(-260px); } }

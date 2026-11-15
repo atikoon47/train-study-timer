@@ -1,57 +1,33 @@
-/**
- * Service Worker สำหรับใช้งานออฟไลน์ (Offline-first Cache)
- */
+// แคชไฟล์ของแอปไว้ใช้ออฟไลน์ — เปลี่ยน VERSION ทุกครั้งที่แก้ไฟล์ในรายการ
+const VERSION = 'v2.5.1';
+const ASSETS = ['./', './index.html', './css/app.css', './js/rail.js', './js/store.js', './js/sound.js',
+  './js/scene.js', './js/ticket.js', './js/map.js', './js/app.js', './css/scene.css', './manifest.json', './icon.svg'];
 
-const CACHE_NAME = 'study-train-ticket-v1';
-const ASSETS_TO_CACHE = [
-  './',
-  './index.html',
-  './css/variables.css',
-  './css/animations.css',
-  './css/ticket.css',
-  './css/style.css',
-  './js/routes-data.js',
-  './js/audio.js',
-  './js/storage.js',
-  './js/ticket-drag.js',
-  './js/timer.js',
-  './js/app.js',
-  './manifest.json'
-];
-
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    }).then(() => self.skipWaiting())
-  );
+self.addEventListener('install', (e) => {
+  e.waitUntil(caches.open(VERSION).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
 });
 
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
-      );
-    }).then(() => self.clients.claim())
-  );
+self.addEventListener('activate', (e) => {
+  e.waitUntil(caches.keys()
+    .then(keys => Promise.all(keys.filter(k => k !== VERSION).map(k => caches.delete(k))))
+    .then(() => self.clients.claim()));
 });
 
-self.addEventListener('fetch', (event) => {
-  // กลยุทธ์ Cache First, Network Fallback
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(event.request).then((networkResponse) => {
-        return networkResponse;
-      }).catch(() => {
-        // ออฟไลน์และไม่มีในแคช
-        if (event.request.mode === 'navigate') {
-          return caches.match('./index.html');
-        }
-      });
-    })
-  );
+// ไฟล์ของแอป: โหลดจากเครือข่ายก่อน (ได้เวอร์ชันล่าสุดเสมอ) ถ้าออฟไลน์ใช้จากแคช
+// ฟอนต์จาก Google: ใช้แคชก่อน เพราะไฟล์ไม่เปลี่ยน
+self.addEventListener('fetch', (e) => {
+  if (e.request.method !== 'GET') return;
+  const url = new URL(e.request.url);
+  // ฟอนต์และไลบรารีแผนที่: ไฟล์ไม่เปลี่ยนตามเวอร์ชัน ใช้แคชก่อนได้
+  const isFont = /fonts\.(googleapis|gstatic)\.com$|^unpkg\.com$/.test(url.hostname);
+  if (url.origin !== location.origin && !isFont) return;
+
+  const fromNetwork = () => fetch(e.request).then(res => {
+    if (res.ok) { const copy = res.clone(); caches.open(VERSION).then(c => c.put(e.request, copy)); }
+    return res;
+  });
+  e.respondWith(isFont
+    ? caches.match(e.request).then(hit => hit || fromNetwork())
+    : fromNetwork().catch(() => caches.match(e.request, { ignoreSearch: true })
+        .then(hit => hit || (e.request.mode === 'navigate' ? caches.match('./index.html') : Response.error()))));
 });

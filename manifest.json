@@ -1,18 +1,11 @@
 {
-  "name": "ตั๋วอ่านหนังสือ - Study Train Ticket",
+  "name": "ตั๋วอ่านหนังสือ",
   "short_name": "ตั๋วอ่านหนังสือ",
-  "description": "เว็บแอปจับเวลาอ่านหนังสือธีมรถไฟไทย แปลงเวลาอ่านเป็นระยะทางสะสม",
-  "start_url": "./index.html",
+  "description": "ตัวจับเวลาอ่านหนังสือแบบนั่งรถไฟ",
+  "start_url": "./",
   "display": "standalone",
-  "background_color": "#1b365d",
-  "theme_color": "#1b365d",
-  "orientation": "portrait",
-  "icons": [
-    {
-      "src": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%231b365d%22/><text y=%22.9em%22 x=%22.1em%22 font-size=%2280%22>🚂</text></svg>",
-      "sizes": "192x192 512x512",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
-  ]
+  "background_color": "#14211e",
+  "theme_color": "#14211e",
+  "lang": "th",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
 }
