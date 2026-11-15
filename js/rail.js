@@ -56,7 +56,12 @@
     pcb: { name: 'ปราจีนบุรี', en: 'Prachin Buri', province: 'ปราจีนบุรี', km: 127, scene: 'plain' },
     kbr: { name: 'กบินทร์บุรี', en: 'Kabin Buri', province: 'ปราจีนบุรี', km: 166, scene: 'hills' },
     skw: { name: 'สระแก้ว', en: 'Sa Kaeo', province: 'สระแก้ว', km: 203, scene: 'plain' },
-    arn: { name: 'อรัญประเทศ', en: 'Aranyaprathet', province: 'สระแก้ว', km: 260, scene: 'plain' }
+    arn: { name: 'อรัญประเทศ', en: 'Aranyaprathet', province: 'สระแก้ว', km: 260, scene: 'plain' },
+    // สายชายฝั่งทะเลตะวันออก (แยกจากสายตะวันออกที่ฉะเชิงเทรา)
+    cbi: { name: 'ชลบุรี', en: 'Chon Buri', province: 'ชลบุรี', km: 113, scene: 'plain' },
+    src: { name: 'ชุมทางศรีราชา', en: 'Si Racha Jn.', province: 'ชลบุรี', km: 136, scene: 'coast' },
+    pty: { name: 'พัทยา', en: 'Pattaya', province: 'ชลบุรี', km: 160, scene: 'coast' },
+    bpt: { name: 'บ้านพลูตาหลวง', en: 'Ban Phlu Ta Luang', province: 'ชลบุรี', km: 189, scene: 'coast' }
   };
 
   // พิกัดสถานีโดยประมาณ [ลองจิจูด, ละติจูด]
@@ -73,7 +78,8 @@
     npd: [99.9350, 13.8300], kbi: [99.5283, 14.0283], rkb: [99.5040, 14.0410], tks: [99.1590, 14.1230],
     ntk: [99.0640, 14.2240],
     lkb: [100.7490, 13.7270], cco: [101.0600, 13.6900], pcb: [101.3700, 14.0480], kbr: [101.7120, 13.9700],
-    skw: [102.0660, 13.8070], arn: [102.5050, 13.6930]
+    skw: [102.0660, 13.8070], arn: [102.5050, 13.6930],
+    cbi: [100.9947, 13.3477], src: [100.9420, 13.1720], pty: [100.9030, 12.9310], bpt: [100.9550, 12.7010]
   };
   Object.keys(STATIONS).forEach(id => { STATIONS[id].lngLat = COORDS[id]; });
 
@@ -90,7 +96,9 @@
     { id: 'namtok', name: 'สายน้ำตก', color: '#5b3f8c',
       stops: ['kta', 'npt', 'npd', 'kbi', 'rkb', 'tks', 'ntk'] },
     { id: 'east', name: 'สายตะวันออก', color: '#8c2f55',
-      stops: ['kta', 'lkb', 'cco', 'pcb', 'kbr', 'skw', 'arn'] }
+      stops: ['kta', 'lkb', 'cco', 'pcb', 'kbr', 'skw', 'arn'] },
+    { id: 'eastcoast', name: 'สายชายฝั่งทะเลตะวันออก', color: '#1f6a78',
+      stops: ['kta', 'lkb', 'cco', 'cbi', 'src', 'pty', 'bpt'] }
   ];
 
   // ประเภทขบวน: ความเร็ว (กม. ต่อ นาทีของการอ่าน) — ขบวนเร็วกว่า = อ่านสั้นกว่าในระยะทางเดียวกัน

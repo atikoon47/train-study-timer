@@ -108,6 +108,13 @@ test('สายตะวันออกไปอรัญประเทศ แ�
   assert.strictEqual(r.km, 260 + 64);
 });
 
+test('สายชายฝั่งทะเลตะวันออกแยกที่ชุมทางฉะเชิงเทรา (ชลบุรี → อรัญประเทศ)', () => {
+  const r = Rail.route('cbi', 'arn');
+  assert.deepStrictEqual(r.stops.map(s => s.id), ['cbi', 'cco', 'pcb', 'kbr', 'skw', 'arn']);
+  assert.strictEqual(r.km, (113 - 66) + (260 - 66));
+  assert.strictEqual(Rail.route('kta', 'pty').km, 160);
+});
+
 test('ทุกสถานีมีพิกัด และอยู่บนสายอย่างน้อยหนึ่งสาย', () => {
   for (const id of Object.keys(Rail.STATIONS)) {
     assert.ok(Array.isArray(Rail.STATIONS[id].lngLat), id);

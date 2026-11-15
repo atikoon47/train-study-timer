@@ -4,8 +4,8 @@
  * ถ้าโหลดไลบรารีไม่ได้ (ออฟไลน์) RailMap.available = false แล้วแอปจะใช้รายการสถานีกับวิวหน้าต่างแทน
  */
 const THAILAND = [[97.3, 5.6], [105.7, 20.5]];
-const MAJOR = new Set(['kta', 'nsw', 'psl', 'lpg', 'cmi', 'nma', 'kkn', 'udn', 'nki', 'hhn', 'cpn', 'srt', 'hdy', 'skl', 'kbi']);
-const LINE_COLORS = { north: '#5b9bff', northeast: '#f0a83a', south: '#3fc28a', namtok: '#b48cff', east: '#ef6f9c' };
+const MAJOR = new Set(['kta', 'nsw', 'psl', 'lpg', 'cmi', 'nma', 'kkn', 'udn', 'nki', 'hhn', 'cpn', 'srt', 'hdy', 'skl', 'kbi', 'pty']);
+const LINE_COLORS = { north: '#5b9bff', northeast: '#f0a83a', south: '#3fc28a', namtok: '#b48cff', east: '#ef6f9c', eastcoast: '#4cc9d9' };
 
 // สถานีบนทางร่วม (อยู่หลายสาย เช่น ดอนเมือง อยุธยา บ้านภาชี) ใช้สีกลาง
 const SHARED_COLOR = '#c9d1db';
@@ -61,7 +61,7 @@ class RailMap {
       type: 'FeatureCollection',
       features: Rail.LINES.map(l => ({
         // สายเหนือกับอีสานใช้รางร่วมกันถึงบ้านภาชี วาดเยื้องกันให้เห็นเป็นสองเส้นคู่กัน
-        type: 'Feature', properties: { color: LINE_COLORS[l.id], offset: { north: -2.5, northeast: 2.5, south: -2.5, namtok: 2.5 }[l.id] || 0 },
+        type: 'Feature', properties: { color: LINE_COLORS[l.id], offset: { north: -2.5, northeast: 2.5, south: -2.5, namtok: 2.5, east: -2.5, eastcoast: 2.5 }[l.id] || 0 },
         geometry: { type: 'LineString', coordinates: l.stops.map(id => Rail.STATIONS[id].lngLat) }
       }))
     };

@@ -1,5 +1,5 @@
 // แคชไฟล์ของแอปไว้ใช้ออฟไลน์ — เปลี่ยน VERSION ทุกครั้งที่แก้ไฟล์ในรายการ
-const VERSION = 'v2.6.1';
+const VERSION = 'v2.6.2';
 const ASSETS = ['./', './index.html', './css/app.css', './js/rail.js', './js/store.js', './js/sound.js',
   './js/scene.js', './js/ticket.js', './js/map.js', './js/app.js', './css/scene.css', './manifest.json', './icon.svg'];
 
